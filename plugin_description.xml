@@ -274,6 +274,11 @@
       Control the camera like in a First Person Shooter game: drag left to look left, etc.
     </description>
   </class>
+  <class name="rviz/FPSRoll" type="rviz::FPSRollViewController" base_class_type="rviz::ViewController">
+    <description>
+      Control the camera like in a First Person Shooter game: drag left to look left, etc.
+    </description>
+  </class>
   <class name="rviz/TopDownOrtho" type="rviz::FixedOrientationOrthoViewController" base_class_type="rviz::ViewController">
     <description>
       Orthographic projection, seen from the top.
