@@ -66,6 +66,7 @@ set(SOURCE_FILES
   view_controllers/fixed_orientation_ortho_view_controller.cpp
   view_controllers/fps_view_controller.cpp
   view_controllers/fps_roll_view_controller.cpp
+  view_controllers/frame_top_down_view.cpp
   wrench_display.cpp
   wrench_visual.cpp
 )

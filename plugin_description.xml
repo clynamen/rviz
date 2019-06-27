@@ -279,6 +279,11 @@
       Control the camera like in a First Person Shooter game: drag left to look left, etc.
     </description>
   </class>
+  <class name="rviz/FrameTopDownView" type="rviz::FrameTopDownView" base_class_type="rviz::ViewController">
+    <description>
+      Control the camera like in a First Person Shooter game: drag left to look left, etc.
+    </description>
+  </class>
   <class name="rviz/TopDownOrtho" type="rviz::FixedOrientationOrthoViewController" base_class_type="rviz::ViewController">
     <description>
       Orthographic projection, seen from the top.

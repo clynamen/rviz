@@ -45,7 +45,7 @@
 #include "rviz/properties/float_property.h"
 #include "rviz/properties/vector_property.h"
 
-#include "fps_roll_view_controller.h"
+#include "frame_top_down_view.hpp"
 
 namespace rviz
 {
@@ -57,7 +57,7 @@ static const Ogre::Quaternion ROBOT_TO_CAMERA_ROTATION =
 static const float PITCH_LIMIT_LOW = -Ogre::Math::HALF_PI + 0.001;
 static const float PITCH_LIMIT_HIGH = Ogre::Math::HALF_PI - 0.001;
 
-FPSRollViewController::FPSRollViewController()
+FrameTopDownView::FrameTopDownView()
 {
   yaw_property_ = new FloatProperty( "Yaw", 0, "Rotation of the camera around the Z (up) axis.", this );
 
@@ -67,23 +67,23 @@ FPSRollViewController::FPSRollViewController()
 
   roll_property_ = new FloatProperty( "Roll", 0, "How much the camera is rotated around X.", this );
 
-  position_property_ = new VectorProperty( "Position", Ogre::Vector3( -10, 0, 1 ), "Position of the camera.", this );
+  position_property_ = new VectorProperty( "Position", Ogre::Vector3( 0, 0, 100 ), "Position of the camera.", this );
 }
 
-FPSRollViewController::~FPSRollViewController()
+FrameTopDownView::~FrameTopDownView()
 {
 }
 
-void FPSRollViewController::onInitialize()
+void FrameTopDownView::onInitialize()
 {
   FramePositionTrackingViewController::onInitialize();
   camera_->setProjectionType( Ogre::PT_PERSPECTIVE );
   invert_z_->hide();
 }
 
-void FPSRollViewController::reset()
+void FrameTopDownView::reset()
 {
-  camera_->setPosition( Ogre::Vector3( -10, 0, 1 ));
+  camera_->setPosition( Ogre::Vector3( 0, 0, 100 ));
   camera_->lookAt( 0, 0, 0 );
   setPropertiesFromCamera( camera_ );
 
@@ -96,7 +96,7 @@ void FPSRollViewController::reset()
   setPropertiesFromCamera( camera_ );
 }
 
-void FPSRollViewController::handleMouseEvent(ViewportMouseEvent& event)
+void FrameTopDownView::handleMouseEvent(ViewportMouseEvent& event)
 {
   if ( event.shift() )
   {
@@ -154,7 +154,7 @@ void FPSRollViewController::handleMouseEvent(ViewportMouseEvent& event)
   }
 }
 
-void FPSRollViewController::setPropertiesFromCamera( Ogre::Camera* source_camera )
+void FrameTopDownView::setPropertiesFromCamera( Ogre::Camera* source_camera )
 {
   Ogre::Quaternion quat = source_camera->getOrientation() * ROBOT_TO_CAMERA_ROTATION.Inverse();
   float yaw = quat.getRoll( false ).valueRadians(); // OGRE camera frame looks along -Z, so they call rotation around Z "roll".
@@ -190,13 +190,13 @@ void FPSRollViewController::setPropertiesFromCamera( Ogre::Camera* source_camera
   position_property_->setVector( source_camera->getPosition() );
 }
 
-void FPSRollViewController::mimic( ViewController* source_view )
+void FrameTopDownView::mimic( ViewController* source_view )
 {
   FramePositionTrackingViewController::mimic( source_view );
   setPropertiesFromCamera( source_view->getCamera() );
 }
 
-void FPSRollViewController::update(float dt, float ros_dt)
+void FrameTopDownView::update(float dt, float ros_dt)
 {
   FramePositionTrackingViewController::update( dt, ros_dt );
 
@@ -219,51 +219,51 @@ void FPSRollViewController::update(float dt, float ros_dt)
   updateCamera();
 }
 
-void FPSRollViewController::lookAt( const Ogre::Vector3& point )
+void FrameTopDownView::lookAt( const Ogre::Vector3& point )
 {
   camera_->lookAt( point );
   setPropertiesFromCamera( camera_ );
 }
 
-void FPSRollViewController::onTargetFrameChanged(const Ogre::Vector3& old_reference_position, const Ogre::Quaternion& old_reference_orientation)
+void FrameTopDownView::onTargetFrameChanged(const Ogre::Vector3& old_reference_position, const Ogre::Quaternion& old_reference_orientation)
 {
   position_property_->add( old_reference_position - reference_position_ );
 }
 
-void FPSRollViewController::updateCamera()
+void FrameTopDownView::updateCamera()
 {
   camera_->setOrientation( getOrientation() );
   camera_->setPosition( position_property_->getVector() );
 }
 
-void FPSRollViewController::yaw( float angle )
+void FrameTopDownView::yaw( float angle )
 {
   yaw_property_->setFloat( mapAngleTo0_2Pi( yaw_property_->getFloat() + angle ));
 }
 
-void FPSRollViewController::pitch( float angle )
+void FrameTopDownView::pitch( float angle )
 {
   pitch_property_->add( angle );
 }
 
-void FPSRollViewController::roll( float angle )
+void FrameTopDownView::roll( float angle )
 {
 }
 
-Ogre::Quaternion FPSRollViewController::getOrientation()
+Ogre::Quaternion FrameTopDownView::getOrientation()
 {
   Ogre::Quaternion pitch, yaw, roll;
 
   // yaw.FromAngleAxis( Ogre::Radian( yaw_property_->getFloat() ), Ogre::Vector3::UNIT_Z );
-  pitch.FromAngleAxis( Ogre::Radian( -1.57 ), Ogre::Vector3::UNIT_Y );
-  roll.FromAngleAxis( Ogre::Radian( 1.57 ), Ogre::Vector3::UNIT_X );
+  // pitch.FromAngleAxis( Ogre::Radian( pitch_property_->getFloat() ), Ogre::Vector3::UNIT_Y );
+  // roll.FromAngleAxis( Ogre::Radian( roll_property_->getFloat() ), Ogre::Vector3::UNIT_X );
 
   //return (yaw * pitch  * ROBOT_TO_CAMERA_ROTATION) * roll;
-  return roll * pitch * yaw;
-  // return  Ogre::Quaternion();
+  // return roll * pitch * yaw;
+  return  Ogre::Quaternion();
 }
 
-void FPSRollViewController::move( float x, float y, float z )
+void FrameTopDownView::move( float x, float y, float z )
 {
   Ogre::Vector3 translate( x, y, z );
   position_property_->add( getOrientation() * translate );
@@ -272,4 +272,4 @@ void FPSRollViewController::move( float x, float y, float z )
 } // end namespace rviz
 
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS( rviz::FPSRollViewController, rviz::ViewController )
+PLUGINLIB_EXPORT_CLASS( rviz::FrameTopDownView, rviz::ViewController )
